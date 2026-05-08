@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem 1rem;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        /* ── Header ── */
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .header-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255,255,255,0.18);
+            border: 1px solid rgba(255,255,255,0.35);
+            border-radius: 50px;
+            padding: 12px 32px;
+        }
+        .header-pill h1 {
+            color: #fff;
+            font-size: 1.6rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .header-pill .icon { font-size: 2rem; }
+
+        /* ── Stats bar ── */
+        .stats {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1rem;
+            justify-content: center;
+        }
+        .stat-badge {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            border-radius: 20px;
+            padding: 4px 14px;
+            font-size: 13px;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        /* ── Input card ── */
+        .input-card {
+            background: rgba(255,255,255,0.97);
+            border-radius: 20px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            display: flex;
+            gap: 10px;
+        }
+        .input-card input[type="text"] {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e8d5ff;
+            border-radius: 12px;
+            font-size: 15px;
+            outline: none;
+            background: #faf7ff;
+            color: #333;
+            transition: border-color 0.2s;
+        }
+        .input-card input[type="text"]:focus { border-color: #764ba2; }
+        .input-card button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 22px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+        .input-card button:hover  { opacity: 0.9; }
+        .input-card button:active { transform: scale(0.97); }
+
+        /* ── Task cards ── */
+        .task-list { display: flex; flex-direction: column; gap: 10px; }
+
+        .task-card {
+            border-radius: 16px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            animation: slideIn 0.25s ease;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Colour variants */
+        .task-card.c0 { background:#fff0f6; border: 1.5px solid #f783ac; }
+        .task-card.c1 { background:#f0f4ff; border: 1.5px solid #748ffc; }
+        .task-card.c2 { background:#f0fff4; border: 1.5px solid #69db7c; }
+        .task-card.c3 { background:#fff9f0; border: 1.5px solid #ffa94d; }
+        .task-card.c4 { background:#f3f0ff; border: 1.5px solid #9775fa; }
+        .task-card.c5 { background:#e6fbff; border: 1.5px solid #4dabf7; }
+
+        .badge { font-size: 11px; padding: 3px 12px; border-radius: 20px; color: #fff; white-space: nowrap; }
+        .c0 .badge { background: #e64980; }
+        .c1 .badge { background: #3b5bdb; }
+        .c2 .badge { background: #2f9e44; }
+        .c3 .badge { background: #e67700; }
+        .c4 .badge { background: #6741d9; }
+        .c5 .badge { background: #1971c2; }
+
+        .task-text {
+            flex: 1;
+            font-size: 15px;
+            color: #333;
+        }
+
+        .btn-delete {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 4px 6px;
+            border-radius: 8px;
+            transition: background 0.15s;
+            text-decoration: none;
+            color: #cc3333;
+        }
+        .btn-delete:hover { background: rgba(204,51,51,0.1); }
+
+        /* ── Empty state ── */
+        .empty {
+            text-align: center;
+            color: rgba(255,255,255,0.75);
+            font-size: 14px;
+            margin-top: 2rem;
+            padding: 1rem;
+        }
+        .empty .big { font-size: 3rem; display: block; margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-pill">
+            <span class="icon">📝</span>
+            <h1>To-Do List</h1>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+        <span class="stat-badge">{{ todos|length }} total</span>
+    </div>
+
+    <!-- Add Task Form -->
+    <div class="input-card">
+        <form action="/add" method="POST" style="display:flex; gap:10px; width:100%;">
+            <input type="text" name="task" id="task-input"
+                   placeholder="Enter a new task..." required
+                   autocomplete="off">
+            <button type="submit" id="add-btn">➕ Add</button>
+        </form>
+    </div>
+
+    <!-- Task List -->
+    <div class="task-list">
+        {% for todo in todos %}
+        <div class="task-card c{{ loop.index0 % 6 }}">
+            <span class="task-text" id="todo-{{ todo.id }}">{{ todo.task }}</span>
+            <span class="badge">Task #{{ loop.index }}</span>
+            <a href="/delete/{{ todo.id }}" class="btn-delete" title="Delete">🗑️</a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Empty state -->
+    {% if not todos %}
+    <div class="empty">
+        <span class="big">🎯</span>
+        No tasks yet — add one above!
+    </div>
+    {% endif %}
+
+</div>
+</body>
+</html>
