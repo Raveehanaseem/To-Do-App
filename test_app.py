@@ -17,14 +17,18 @@ def get_driver():
     options.binary_location = "/usr/bin/chromium"
     service = webdriver.ChromeService(executable_path="/usr/bin/chromedriver")
     return webdriver.Chrome(service=service, options=options)
-
 def test_page_loads():
     print(f"Running Test 1: Page Load Test on {APP_URL}...")
     driver = get_driver()
     try:
         driver.get(APP_URL)
-        # Title check (case insensitive)
-        assert "todo" in driver.title.lower(), f"Title mismatch: {driver.title}"
+        # Title check: Ab ye "To-Do List" ya "todo" dono ko accept karega
+        actual_title = driver.title
+        print(f"Website ka asli title hai: {actual_title}")
+        
+        # Hum check kar rahe hain ke title mein "to-do" ya "todo" ka lafz ho
+        assert "to-do" in actual_title.lower() or "todo" in actual_title.lower(), f"Title mismatch: {actual_title}"
+        
         print("✅ Test 1 PASSED")
     except Exception as e:
         print(f"❌ Test 1 FAILED: {e}")
