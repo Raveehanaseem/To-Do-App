@@ -47,18 +47,22 @@ pipeline {
         }
 
         stage('Containerized Selenium Testing') {
-            steps {
-                echo '=== Stage 4: Running Selenium Tests ==='
-                sh '''
-                    docker build -f Dockerfile.test -t ${TEST_IMAGE} .
-                    docker run --rm \
-                        --network container:${APP_CONTAINER} \
-                        -e APP_URL=http://localhost:5000 \
-                        ${TEST_IMAGE}
-                    echo "Selenium tests completed."
-                '''
-            }
-        }
+    steps {
+        sh '''
+            
+            docker network create todo-net || true
+            
+            # Test image build karo
+            docker build -f Dockerfile.test -t ${TEST_IMAGE} .
+            
+            
+            docker run --rm \
+                --network todo-net \
+                -e APP_URL=http://todo-app-container:5000 \
+                ${TEST_IMAGE}
+        '''
+    }
+}
     }
 
     post {
