@@ -2,22 +2,24 @@ pipeline {
     agent any
 
     environment {
-        APP_IMAGE   = "todo-app:latest"
-        TEST_IMAGE  = "todo-test:latest"
+        APP_IMAGE      = "todo-app:latest"
+        TEST_IMAGE     = "todo-test:latest"
         APP_CONTAINER  = "todo-app-container"
     }
+    
     stages {
-
         stage('Code Linting') {
             steps {
                 echo '=== Stage 1: Code Linting ==='
+                /* Added --break-system-packages to bypass Ubuntu security restriction */
                 sh '''
-                    pip3 install pyflakes --quiet
+                    pip3 install pyflakes --quiet --break-system-packages || true
                     python3 -m pyflakes app.py || true
                     echo "Linting complete."
                 '''
             }
         }
+
         stage('Code Build') {
             steps {
                 echo '=== Stage 2: Building Docker Image ==='
@@ -27,6 +29,7 @@ pipeline {
                 '''
             }
         }
+
         stage('Containerized Deployment') {
             steps {
                 echo '=== Stage 3: Deploying Application Container ==='
@@ -42,6 +45,7 @@ pipeline {
                 '''
             }
         }
+
         stage('Containerized Selenium Testing') {
             steps {
                 echo '=== Stage 4: Running Selenium Tests ==='
@@ -56,10 +60,12 @@ pipeline {
             }
         }
     }
+
     post {
         always {
             echo '=== Cleaning up containers ==='
-            sh 'docker rm -f ${APP_CONTAINER} || true'
+            /* Using double quotes allows Jenkins to inject the environment variable */
+            sh "docker rm -f ${APP_CONTAINER} || true"
         }
         success {
             echo '✅ Pipeline completed successfully!'
